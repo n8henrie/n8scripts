@@ -13,10 +13,35 @@ import __main__
 import argparse
 import http
 import os.path
+import subprocess
+import sys
 import typing
 import urllib.parse
 import urllib.request
 
+
+class OSXSecurity:
+    """Uses the MacOS `security` command following the keyring library API."""
+
+    def __init__(self):
+        """Ensure platform is `darwin`."""
+        if sys.platform != 'darwin':
+            raise OSError(f"{self.__class__ } can only run on MacOS (darwin)")
+
+    def get_password(self, service: str, account: str) -> str:
+        """Use keychain API to get password for service / account."""
+        cmd = f'security find-generic-password -s {service} -a {account} -w'
+        process = subprocess.run(cmd.split(), stdout=subprocess.PIPE)
+        data = process.stdout
+        return data.decode('utf8').strip()
+
+try:
+    import keychain
+except ImportError:
+    try:
+        import keychain
+    except ImportError:
+        keychain = OSXSecurity()
 
 def get_credentials() -> typing.Tuple[str, str]:
     """Get Pushover user and api_token."""
@@ -24,12 +49,6 @@ def get_credentials() -> typing.Tuple[str, str]:
         user = os.environ['PUSHOVER_USER']
         api_token = os.environ['PUSHOVER_API_TOKEN']
     except KeyError:
-        try:
-            # Pythonista for iOS
-            import keychain
-        except ImportError:
-            import keyring as keychain
-
         user = keychain.get_password('pushover', 'user')
         api_token = keychain.get_password('pushover', 'api_token')
     return user, api_token
