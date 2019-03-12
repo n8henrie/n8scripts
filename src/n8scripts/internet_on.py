@@ -4,8 +4,9 @@ Checks to make sure that an internet connection is present before
 the rest of a script will run.
 """
 
-import urllib.request
+import socket
 import time
+import urllib.request
 
 
 class NoInternetError(Exception):
@@ -20,7 +21,7 @@ def internet_on(retries=3, timeout=4, delay=5):
         try:
             with urllib.request.urlopen(google_url, timeout=timeout) as resp:
                 return resp.status == 200
-        except urllib.error.URLError:
+        except (urllib.error.URLError, socket.timeout):
             time.sleep(delay)
     raise NoInternetError('There was no internet connectivity when I tried to'
                           ' run at {}.'.format(time.asctime()))
