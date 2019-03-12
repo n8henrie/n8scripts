@@ -10,12 +10,13 @@ import urllib.request
 
 
 class NoInternetError(Exception):
-    '''Error for no internet connectivity.'''
+    """Error for no internet connectivity."""
+
     pass
 
 
 def internet_on(retries=3, timeout=4, delay=5):
-    google_url = 'http://google.com'
+    google_url = "http://google.com"
 
     for x in range(retries):
         try:
@@ -23,5 +24,7 @@ def internet_on(retries=3, timeout=4, delay=5):
                 return resp.status == 200
         except (urllib.error.URLError, socket.timeout):
             time.sleep(delay)
-    raise NoInternetError('There was no internet connectivity when I tried to'
-                          ' run at {}.'.format(time.asctime()))
+    raise NoInternetError(
+        "There was no internet connectivity when I tried to"
+        " run at {}.".format(time.asctime())
+    )
